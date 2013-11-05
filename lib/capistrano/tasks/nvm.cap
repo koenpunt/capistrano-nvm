@@ -1,0 +1,44 @@
+namespace :deploy do
+  before :starting, :'nvm:check'
+end
+
+namespace :nvm do
+  task :check do
+    on roles(:all) do
+      nvm_node = fetch(:nvm_node)
+      if nvm_node.nil?
+        error "nvm: nvm_node is not set"
+        exit 1
+      end
+
+      unless test "[ -d #{fetch(:nvm_node_dir)} ]"
+        error "nvm: #{nvm_node} is not installed or not found in #{fetch(:nvm_node_dir)}"
+        exit 1
+      end
+
+      default_env = fetch(:default_env)
+      default_env[:path] = if default_env[:path].nil?
+                             "#{fetch(:nvm_bin_path)}:$PATH"
+                           else
+                             "#{fetch(:nvm_bin_path)}:#{default_env[:path]}"
+                           end
+    end
+  end
+end
+
+namespace :load do
+  task :defaults do
+
+    set :nvm_dir, -> {
+      nvm_dir = fetch(:nvm_custom_dir)
+      nvm_dir ||= if fetch(:nvm_type, :user) == :system
+        "/usr/local/nvm"
+      else
+        "~/.nvm"
+      end
+    }
+
+    set :nvm_node_dir, -> { "#{fetch(:nvm_dir)}/#{fetch(:nvm_node)}" }
+    set :nvm_bin_path, -> { "#{fetch(:nvm_node_dir)}/bin" }
+  end
+end

@@ -3,12 +3,6 @@
 This gem provides idiomatic [nvm](https://github.com/creationix/nvm) support for Capistrano 3.x (and 3.x
 *only*).
 
-<!-- ## Please Note
-
-This ```capistrano-nvm``` repo is different from the current
-```capistrano-nvm``` gem on rubygems.org. You **must** specify
-**this github repo** in your Gemfile! -->
-
 ## Installation
 
 Add this line to your application's Gemfile:

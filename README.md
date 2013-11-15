@@ -8,7 +8,7 @@ This gem provides idiomatic [nvm](https://github.com/creationix/nvm) support for
 Add this line to your application's Gemfile:
 
     gem 'capistrano', '~> 3.0'
-    gem 'capistrano-nvm', github: "koenpunt/capistrano-nvm"
+    gem 'capistrano-nvm', github: "koenpunt/capistrano-nvm", require: false
 
 And then execute:
 
@@ -20,6 +20,8 @@ And then execute:
     # Capfile
 
     require 'capistrano/nvm'
+    
+    # deploy.rb
 
     set :nvm_type, :user # or :system, depends on your nvm setup
     set :nvm_node, 'v0.10.21'

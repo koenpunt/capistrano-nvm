@@ -1,9 +1,5 @@
-namespace :deploy do
-  before :starting, :'nvm:check'
-end
-
 namespace :nvm do
-  task :check do
+  task validate: :'nvm:wrapper' do
     on roles(:all) do
       nvm_node = fetch(:nvm_node)
       if nvm_node.nil?
@@ -11,34 +7,47 @@ namespace :nvm do
         exit 1
       end
 
-      unless test "[ -d #{fetch(:nvm_node_dir)} ]"
-        error "nvm: #{nvm_node} is not installed or not found in #{fetch(:nvm_node_dir)}"
+      unless test "[ -d #{fetch(:nvm_node_path)} ]"
+        error "nvm: #{nvm_node} is not installed or not found in #{fetch(:nvm_node_path)}"
         exit 1
       end
-
-      default_env = fetch(:default_env)
-      default_env[:path] = if default_env[:path].nil?
-                             "#{fetch(:nvm_bin_path)}:$PATH"
-                           else
-                             "#{fetch(:nvm_bin_path)}:#{default_env[:path]}"
-                           end
     end
   end
+
+  task :map_bins do
+    nvm_prefix = fetch(:nvm_prefix, -> { "NODE_VERSION=#{fetch(:nvm_node)} #{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh" } )
+    fetch(:nvm_map_bins).each do |command|
+      SSHKit.config.command_map.prefix[command.to_sym].unshift(nvm_prefix)
+    end
+  end
+
+  task :wrapper do
+    on roles(:all) do
+      execute :mkdir, "-p", "#{fetch(:tmp_dir)}/#{fetch(:application)}/"
+      upload! StringIO.new("#!/bin/bash -e\nsource \"#{fetch(:nvm_path)}/nvm.sh\"\nnvm use $NODE_VERSION\nexec \"$@\""), "#{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh"
+      execute :chmod, "+x", "#{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh"
+    end
+  end
+end
+
+Capistrano::DSL.stages.each do |stage|
+  after stage, 'nvm:validate'
+  after stage, 'nvm:map_bins'
 end
 
 namespace :load do
   task :defaults do
 
-    set :nvm_dir, -> {
-      nvm_dir = fetch(:nvm_custom_dir)
-      nvm_dir ||= if fetch(:nvm_type, :user) == :system
+    set :nvm_path, -> {
+      nvm_path = fetch(:nvm_custom_path)
+      nvm_path ||= if fetch(:nvm_type, :user) == :system
         "/usr/local/nvm"
       else
         "~/.nvm"
       end
     }
 
-    set :nvm_node_dir, -> { "#{fetch(:nvm_dir)}/#{fetch(:nvm_node)}" }
-    set :nvm_bin_path, -> { "#{fetch(:nvm_node_dir)}/bin" }
+    set :nvm_node_path, -> { "#{fetch(:nvm_path)}/#{fetch(:nvm_node)}" }
+    set :nvm_map_bins, %w{node npm}
   end
 end

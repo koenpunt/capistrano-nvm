@@ -1,14 +1,15 @@
 # Capistrano::nvm
 
-This gem provides idiomatic [nvm](https://github.com/creationix/nvm) support for Capistrano 3.x (and 3.x
-*only*).
+[nvm](https://github.com/creationix/nvm) support for Capistrano 3.x
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'capistrano', '~> 3.0'
-    gem 'capistrano-nvm', github: "koenpunt/capistrano-nvm"
+```ruby
+gem 'capistrano', '~> 3.0'
+gem 'capistrano-nvm'
+```
 
 And then execute:
 
@@ -17,12 +18,19 @@ And then execute:
 
 ## Usage
 
-    # Capfile
+Require in `Capfile` to use the default task:
 
-    require 'capistrano/nvm'
+```ruby
+require 'capistrano/nvm'
+```
 
-    set :nvm_type, :user # or :system, depends on your nvm setup
-    set :nvm_node, 'v0.10.21'
+Configurable options:
+
+```ruby
+set :nvm_type, :user # or :system, depends on your nvm setup
+set :nvm_node, 'v0.10.21'
+set :nvm_map_bins, %w{node npm}
+```
 
 If your nvm is located in some custom path, you can use `nvm_custom_path` to set it.
 

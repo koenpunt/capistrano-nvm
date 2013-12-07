@@ -13,8 +13,7 @@ gem 'capistrano-nvm'
 
 And then execute:
 
-    $ bundle --binstubs
-    $ cap install
+    $ bundle install
 
 ## Usage
 

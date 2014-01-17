@@ -15,7 +15,8 @@ namespace :nvm do
   end
 
   task :map_bins do
-    nvm_prefix = fetch(:nvm_prefix, -> { "NODE_VERSION=#{fetch(:nvm_node)} #{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh" } )
+    SSHKit.config.default_env.merge!({ node_version: "#{fetch(:nvm_node)}" })
+    nvm_prefix = fetch(:nvm_prefix, -> { "#{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh" } )
     fetch(:nvm_map_bins).each do |command|
       SSHKit.config.command_map.prefix[command.to_sym].unshift(nvm_prefix)
     end

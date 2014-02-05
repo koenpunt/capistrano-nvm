@@ -44,7 +44,7 @@ namespace :load do
       nvm_path ||= if fetch(:nvm_type, :user) == :system
         "/usr/local/nvm"
       else
-        "~/.nvm"
+        "$HOME/.nvm"
       end
     }
 

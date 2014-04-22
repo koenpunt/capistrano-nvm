@@ -7,8 +7,8 @@
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'capistrano', '~> 3.0'
-gem 'capistrano-nvm'
+gem 'capistrano', '~> 3.1'
+gem 'capistrano-nvm', require: false
 ```
 
 And then execute:

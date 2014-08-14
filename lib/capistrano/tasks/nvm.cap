@@ -1,6 +1,6 @@
 namespace :nvm do
   task validate: :'nvm:wrapper' do
-    on roles(:all) do
+    on release_roles(fetch(:nvm_roles)) do
       nvm_node = fetch(:nvm_node)
       if nvm_node.nil?
         error "nvm: nvm_node is not set"
@@ -47,6 +47,8 @@ namespace :load do
         "$HOME/.nvm"
       end
     }
+
+    set :nvm_roles, fetch(:nvm_roles, :all)
 
     set :nvm_node_path, -> { "#{fetch(:nvm_path)}/#{fetch(:nvm_node)}" }
     set :nvm_map_bins, %w{node npm}

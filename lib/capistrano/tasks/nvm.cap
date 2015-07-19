@@ -7,8 +7,12 @@ namespace :nvm do
         exit 1
       end
 
-      unless test "[ -d #{fetch(:nvm_node_path)} ]"
-        error "nvm: #{nvm_node} is not installed or not found in #{fetch(:nvm_node_path)}"
+      nvm_node_path = {
+        previous_nvm_version: "#{fetch(:nvm_path)}/#{fetch(:nvm_node)}",
+        current_nvm_version: "#{fetch(:nvm_path)}/versions/node/#{fetch(:nvm_node)}"
+      }
+      unless test("[ -d #{nvm_node_path[:previous_nvm_version]} ]") || test("[ -d #{nvm_node_path[:current_nvm_version]} ]")
+        error "nvm: #{nvm_node} is not installed or not found in #{nvm_node_path[:previous_nvm_version]} or #{nvm_node_path[:current_nvm_version]}"
         exit 1
       end
     end
@@ -49,7 +53,6 @@ namespace :load do
     }
 
     set :nvm_roles, fetch(:nvm_roles, :all)
-    set :nvm_node_path, -> { "#{fetch(:nvm_path)}/#{fetch(:nvm_node)}" }
     set :nvm_map_bins, %w{node npm}
   end
 end

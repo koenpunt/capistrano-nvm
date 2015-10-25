@@ -2,9 +2,11 @@
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
+require 'capistrano-nvm/version'
+
 Gem::Specification.new do |spec|
   spec.name          = 'capistrano-nvm'
-  spec.version       = '0.0.5'
+  spec.version       = CapistranoNvm::VERSION
   spec.authors       = ['Koen Punt']
   spec.email         = ['me@koen.pt']
   spec.description   = %q{nvm support for Capistrano 3.x}

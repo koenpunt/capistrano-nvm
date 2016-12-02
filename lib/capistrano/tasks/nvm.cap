@@ -7,12 +7,15 @@ namespace :nvm do
         exit 1
       end
 
+      nvm_path = fetch(:nvm_path)
+      unless test("[ -d #{nvm_path} ]")
+        execute "curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.0/install.sh | NVM_DIR=#{nvm_path} bash"
+      end
+
       nvm_node_path = fetch(:nvm_node_path)
       nvm_node_path = [nvm_node_path] unless nvm_node_path.is_a?(Array)
-
       unless test(nvm_node_path.map {|p| "[ -d #{p} ]" }.join(" || "))
-        error "nvm: #{nvm_node} is not installed or not found in any of #{nvm_node_path.join(" ")}"
-        exit 1
+        execute "source #{nvm_path}/nvm.sh && nvm install #{nvm_node}"
       end
     end
   end

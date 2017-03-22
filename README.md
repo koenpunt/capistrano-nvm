@@ -33,6 +33,16 @@ set :nvm_map_bins, %w{node npm yarn}
 
 If your nvm is located in some custom path, you can use `nvm_custom_path` to set it.
 
+## Alternative way
+
+Set node path through `default_env` variable:
+
+```ruby
+set :default_env, {
+  'PATH' => "$PATH:/home/user/.nvm/versions/node/v7.0.0/bin/"
+}
+```
+
 ## Contributing
 
 1. Fork it

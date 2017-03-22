@@ -28,7 +28,7 @@ Configurable options:
 ```ruby
 set :nvm_type, :user # or :system, depends on your nvm setup
 set :nvm_node, 'v0.10.21'
-set :nvm_map_bins, %w{node npm}
+set :nvm_map_bins, %w{node npm yarn}
 ```
 
 If your nvm is located in some custom path, you can use `nvm_custom_path` to set it.

@@ -27,7 +27,7 @@ Configurable options:
 
 ```ruby
 set :nvm_type, :user # or :system, depends on your nvm setup
-set :nvm_node, 'v0.10.21'
+set :nvm_node, 'v6.10.0'
 set :nvm_map_bins, %w{node npm}
 ```
 

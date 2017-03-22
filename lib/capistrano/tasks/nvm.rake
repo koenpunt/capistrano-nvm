@@ -53,6 +53,6 @@ namespace :load do
 
     set :nvm_roles, fetch(:nvm_roles, :all)
     set :nvm_node_path, -> { ["#{fetch(:nvm_path)}/#{fetch(:nvm_node)}", "#{fetch(:nvm_path)}/versions/node/#{fetch(:nvm_node)}"] }
-    set :nvm_map_bins, %w{node npm}
+    set :nvm_map_bins, %w{node npm yarn}
   end
 end

@@ -23,7 +23,6 @@ namespace :nvm do
   task :map_bins do
     SSHKit.config.default_env[:node_version] = fetch(:nvm_node).to_s
     SSHKit.config.default_env[:nvm_verb] = fetch(:nvm_verb).to_s
-    SSHKit.config.default_env[:nvm_home] = fetch(:nvm_home).to_s
     nvm_prefix = fetch(:nvm_prefix, -> { "#{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh" })
     fetch(:nvm_map_bins).each do |command|
       SSHKit.config.command_map.prefix[command.to_sym].unshift(nvm_prefix)
@@ -33,7 +32,7 @@ namespace :nvm do
   task :wrapper do
     on release_roles(fetch(:nvm_roles)) do
       execute :mkdir, '-p', "#{fetch(:tmp_dir)}/#{fetch(:application)}/"
-      upload! StringIO.new("#!/bin/bash -e\nsource \"#{fetch(:nvm_path)}/nvm.sh\"\nexport NVM_HOME=\"#{fetch(:nvm_home)}\"\nnvm $NVM_VERB $NODE_VERSION\nexec \"$@\""), "#{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh"
+      upload! StringIO.new("#!/bin/bash -e\nsource \"#{fetch(:nvm_path)}/nvm.sh\"\nnvm $NVM_VERB $NODE_VERSION\nexec \"$@\""), "#{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh"
       execute :chmod, '+x', "#{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh"
     end
   end
@@ -49,15 +48,6 @@ namespace :load do
     set :nvm_path, -> {
       nvm_path = fetch(:nvm_custom_path)
       nvm_path ||= if fetch(:nvm_type, :user) == :system
-                     '/usr/local/nvm'
-                   else
-                     '$HOME/.nvm'
-      end
-    }
-
-    set :nvm_home, -> {
-      nvm_home = fetch(:nvm_custom_home)
-      nvm_home ||= if fetch(:nvm_type, :user) == :system
                      '/usr/local/nvm'
                    else
                      '$HOME/.nvm'

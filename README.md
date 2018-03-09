@@ -8,7 +8,7 @@ Add this line to your application's Gemfile:
 
 ```ruby
 gem 'capistrano', '~> 3.1'
-gem 'capistrano-nvm', require: false, github: 'BuyerQuest/capistrano-nvm'
+gem 'capistrano-nvm', require: false
 ```
 
 And then execute:

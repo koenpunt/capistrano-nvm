@@ -1,3 +1,4 @@
+# rubocop:disable Lint/UselessAssignment,Style/Lambda
 namespace :nvm do
   task validate: :'nvm:wrapper' do
     on release_roles(fetch(:nvm_roles)) do
@@ -51,7 +52,7 @@ namespace :load do
                      '/usr/local/nvm'
                    else
                      '$HOME/.nvm'
-      end
+                   end
     }
 
     set :nvm_roles, fetch(:nvm_roles, :all)

@@ -9,9 +9,10 @@ namespace :nvm do
 
       nvm_node_path = fetch(:nvm_node_path)
       nvm_node_path = [nvm_node_path] unless nvm_node_path.is_a?(Array)
+      nvm_verb = fetch(:nvm_verb).to_s
 
-      unless test(nvm_node_path.map { |p| "[ -d #{p} ]" }.join(' || ')) && fetch(:nvm_verb) == :use
-        error "nvm: #{nvm_node} is not installed or not found in any of #{nvm_node_path.join(' ')}"
+      unless test(nvm_node_path.map { |p| "[ -d #{p} ]" }.join(' || ')) && nvm_verb == "use"
+        error "nvm: #{nvm_node} is not installed or not found in any of #{nvm_node_path.join(' ')}, and nvm is set to #{nvm_verb}"
         exit 1
       end
     end

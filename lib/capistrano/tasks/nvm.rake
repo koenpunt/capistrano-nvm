@@ -33,7 +33,7 @@ namespace :nvm do
   task :wrapper do
     on release_roles(fetch(:nvm_roles)) do
       execute :mkdir, '-p', "#{fetch(:tmp_dir)}/#{fetch(:application)}/"
-      upload! StringIO.new("#!/bin/bash -e\nsource \"#{fetch(:nvm_path)}/nvm.sh\"\nNVM_HOME=\"#{fetch(:nvm_home)}\"\nnvm $NVM_VERB $NODE_VERSION\nexec \"$@\""), "#{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh"
+      upload! StringIO.new("#!/bin/bash -e\nsource \"#{fetch(:nvm_path)}/nvm.sh\"\nexport NVM_HOME=\"#{fetch(:nvm_home)}\"\nnvm $NVM_VERB $NODE_VERSION\nexec \"$@\""), "#{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh"
       execute :chmod, '+x', "#{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh"
     end
   end

@@ -1,0 +1,7 @@
+---
+AllCops:
+  DisplayCopNames: true
+
+Metrics/LineLength:
+  Description: "We've got some long lines, so let's raise the limit."
+  Max: 200

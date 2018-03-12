@@ -23,8 +23,8 @@ namespace :nvm do
 
   task :map_bins do
     SSHKit.config.default_env[:node_version] = fetch(:nvm_node).to_s
-    nvm_prefix = fetch(:nvm_prefix, -> { "#{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh" })
     SSHKit.config.default_env[:nvm_verb] = fetch(:nvm_verb).to_s
+    nvm_prefix = fetch(:nvm_prefix, -> { "#{fetch(:tmp_dir)}/#{fetch(:application)}/nvm-exec.sh" })
     fetch(:nvm_map_bins).each do |command|
       SSHKit.config.command_map.prefix[command.to_sym].unshift(nvm_prefix)
     end

@@ -1,1 +1,1 @@
-load File.expand_path("../tasks/nvm.rake", __FILE__)
+load File.expand_path('../tasks/nvm.rake', __FILE__)

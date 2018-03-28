@@ -8,9 +8,7 @@ Add this line to your application's Gemfile:
 
 ```ruby
 gem 'capistrano', '~> 3.1'
-group: :deploy do
-  gem 'capistrano-nvm', require: false
-end
+gem 'capistrano-nvm', require: false
 ```
 
 And then execute:

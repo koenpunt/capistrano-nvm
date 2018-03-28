@@ -34,14 +34,8 @@ namespace :nvm do
   end
 end
 
-Capistrano::DSL.stages.each do |stage|
-  after stage, 'nvm:validate'
-  after stage, 'nvm:map_bins'
-end
-
 namespace :load do
   task :defaults do
-
     set :nvm_path, -> {
       nvm_path = fetch(:nvm_custom_path)
       nvm_path ||= if fetch(:nvm_type, :user) == :system

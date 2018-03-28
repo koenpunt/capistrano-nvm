@@ -6,7 +6,7 @@ require 'capistrano-nvm/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'capistrano-nvm'
-  spec.version       = CapistranoNvm::VERSION
+  spec.version       = Capistrano::Nvm::VERSION
   spec.authors       = ['Koen Punt']
   spec.email         = ['me@koen.pt']
   spec.description   = %q{nvm support for Capistrano 3.x}

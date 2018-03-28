@@ -30,7 +30,7 @@ Alternatively, if you want to have control on the execution of nvm tasks
 
 ```ruby
 # Capfile
-require capistrano/nvm_no_hooks
+require capistrano/nvm/without_hooks
 ```
 
 You can then add the hooks on a per deploy script basis

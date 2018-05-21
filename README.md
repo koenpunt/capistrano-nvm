@@ -31,7 +31,7 @@ The task then uses command maps to run `nvm.sh` when necessary, as controlled by
 
 ### Settings
 
-In your capistrano `config/deploy.rb`:
+In your Capistrano `config/deploy.rb`:
 
 #### Required
 
@@ -49,13 +49,13 @@ In your capistrano `config/deploy.rb`:
 
 - `:nvm_custom_path`
   - Accepts: String
-  - Default: Unused
+  - Default: None
   - Notes: Setting this effectively overrides `:nvm_type`.
 
 - `:nvm_map_bins`
   - Accepts: Ruby word array
   - Default: `%w{node npm yarn}`
-  - Notes: This is a list of commands that will be executed with NVM support by capistrano.
+  - Notes: This is a list of commands that will be executed with nvm support by Capistrano.
 
 - `:nvm_verb`
   - Accepts: `:use`, `:install`
@@ -66,10 +66,10 @@ In your capistrano `config/deploy.rb`:
 
 ### Configuring Capistrano
 
-Using a version of NodeJS that is already installed and managed by NVM:
+Using a version of NodeJS that is already installed and managed by nvm:
 
 ```ruby
-set :nvm_node, 'v8.10' # Version of node.js to use with NVM
+set :nvm_node, 'v8.10' # Version of node.js to use with nvm
 ```
 
 Using a version of NodeJS that we want to download and install:
@@ -79,7 +79,7 @@ set :nvm_node, 'lts/carbon' # Friendly names work well...
 set :nvm_verb, 'install' # ...but only with the "install" verb
 ```
 
-When NVM is installed at the system level:
+When nvm is installed at the system level:
 
 ```ruby
 set :nvm_node, 'lts'
@@ -87,7 +87,7 @@ set :nvm_verb, 'install'
 set :nvm_type, :system
 ```
 
-When NVM is installed in a custom location:
+When nvm is installed in a custom location:
 
 ```ruby
 set :nvm_node, 'lts'

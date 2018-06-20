@@ -1,12 +1,13 @@
 # coding: utf-8
+
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-require 'capistrano-nvm/version'
+require 'capistrano/nvm/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'capistrano-nvm'
-  spec.version       = CapistranoNvm::VERSION
+  spec.version       = Capistrano::Nvm::VERSION
   spec.authors       = ['Koen Punt']
   spec.email         = ['me@koen.pt']
   spec.description   = %q{nvm support for Capistrano 3.x}
@@ -14,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/koenpunt/capistrano-nvm'
   spec.license       = 'MIT'
 
-  spec.files         = `git ls-files`.split($/)
+  spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']

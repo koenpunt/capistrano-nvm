@@ -1,0 +1,4 @@
+load File.expand_path('../nvm.cap', __FILE__)
+load File.expand_path('../../hooks/nvm_hooks.cap', __FILE__)
+
+

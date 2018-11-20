@@ -3,14 +3,13 @@ namespace :nvm do
     on release_roles(fetch(:nvm_roles)) do
       nvm_node = fetch(:nvm_node)
       if nvm_node.nil?
-        error "nvm: nvm_node is not set"
-        exit 1
+        info 'nvm: nvm_node is not set; node version will be defined by the remote hosts via nvm'
       end
 
       nvm_node_path = fetch(:nvm_node_path)
       nvm_node_path = [nvm_node_path] unless nvm_node_path.is_a?(Array)
 
-      unless test(nvm_node_path.map {|p| "[ -d #{p} ]" }.join(" || "))
+      unless nvm_node.nil? || test(nvm_node_path.map {|p| "[ -d #{p} ]" }.join(" || "))
         error "nvm: #{nvm_node} is not installed or not found in any of #{nvm_node_path.join(" ")}"
         exit 1
       end

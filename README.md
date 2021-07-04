@@ -33,6 +33,8 @@ set :nvm_map_bins, %w{node npm yarn}
 
 If your nvm is located in some custom path, you can use `nvm_custom_path` to set it.
 
+If you use capistrano-nvm with rails and webpacker/yarn, add rake to the `:nvm_map_bins` to use nvm in `bundle asset:precompile`
+
 ## Contributing
 
 1. Fork it

@@ -1,0 +1,12 @@
+---
+AllCops:
+  NewCops: enable
+  DisplayCopNames: false
+
+Layout/LineLength:
+  Description: "We've got some long lines, so let's raise the limit."
+  Max: 180
+
+Metrics/BlockLength:
+  Description: "We've got some larger blocks, so let's raise the limit."
+  Max: 30

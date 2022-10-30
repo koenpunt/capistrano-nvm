@@ -20,7 +20,25 @@ And then execute:
 Require in `Capfile` to use the default task:
 
 ```ruby
+# Capfile
 require 'capistrano/nvm'
+```
+
+Alternatively, if you want to have control on the execution of nvm tasks
+
+```ruby
+# Capfile
+require capistrano/nvm/without_hooks
+```
+
+You can then add the hooks on a per deploy script basis
+
+```ruby
+# config/deploy/my_stage_with_nvm.rb
+Capistrano::DSL.stages.each do |stage|
+  after stage, 'nvm:validate'
+  after stage, 'nvm:map_bins'
+end
 ```
 
 Configurable options:

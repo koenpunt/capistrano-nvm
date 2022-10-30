@@ -29,3 +29,36 @@ jobs:
           bundle install --jobs 4 --retry 3
       - name: Lint
         run: bundle exec rubocop
+
+  integration:
+    name: Integrate in project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.7'
+      - name: Cache bundler
+        uses: actions/cache@v3
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-bundler-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bundler-
+      - name: Install gems
+        run: |
+          gem install bundler -v 2.3.5
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+      - name: Setup
+        run: |
+          mkdir integration && cd integration
+          bundle exec cap install
+          printf "set :nvm_type, :user\n" >> config/deploy.rb
+          printf "set :nvm_node, 'v16.14.2'\n" >> config/deploy.rb
+          printf "set :nvm_map_bins, %%w[node npm yarn]\n" >> config/deploy.rb
+          printf "require 'capistrano/nvm'" >> Capfile
+      - name: Validate
+        run: |
+          cd integration
+          bundle exec cap production deploy --trace --dry-run --backtrace=stdout | grep nvm

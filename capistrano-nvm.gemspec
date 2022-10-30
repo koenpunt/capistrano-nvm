@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.name          = 'capistrano-nvm'
   spec.version       = CapistranoNvm::VERSION
   spec.authors       = ['Koen Punt']
-  spec.email         = ['me@koen.pt']
+  spec.email         = ['koen@koenpunt.nl']
   spec.description   = %q{nvm support for Capistrano 3.x}
   spec.summary       = %q{nvm support for Capistrano 3.x}
   spec.homepage      = 'https://github.com/koenpunt/capistrano-nvm'
@@ -21,6 +21,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'capistrano', '~> 3.1'
 
-  spec.add_development_dependency 'bundler', '~> 1.3'
+  spec.add_development_dependency 'bundler', '~> 2.3'
   spec.add_development_dependency 'rake'
 end

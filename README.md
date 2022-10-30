@@ -13,7 +13,9 @@ gem 'capistrano-nvm', require: false
 
 And then execute:
 
-    $ bundle install
+```shell
+$ bundle install
+```
 
 ## Usage
 
@@ -23,15 +25,96 @@ Require in `Capfile` to use the default task:
 require 'capistrano/nvm'
 ```
 
-Configurable options:
+The task then uses command maps to run `nvm.sh` when necessary, as controlled by the setting `:nvm_map_bins`.
+
+## Configuration
+
+### Settings
+
+In your Capistrano `config/deploy.rb`:
+
+#### Required
+
+- `:nvm_node`
+  - Accepts: String
+  - Default: None
+  - Notes: The version number must be prefixed with a `v` if `:nvm_verb` is set to `:use`. See examples below.
+
+#### Optional
+
+- `:nvm_type`
+  - Accepts: `:user`, `:system`
+  - Default: `:user`
+  - Notes: Used to determine the location of `nvm.sh`, similar to setting `$NVM_HOME` in your shell.
+
+- `:nvm_custom_path`
+  - Accepts: String
+  - Default: None
+  - Notes: Setting this effectively overrides `:nvm_type`.
+
+- `:nvm_map_bins`
+  - Accepts: Ruby word array
+  - Default: `%w{node npm yarn}`
+  - Notes: This is a list of commands that will be executed with nvm support by Capistrano.
+
+- `:nvm_verb`
+  - Accepts: `:use`, `:install`
+  - Default: `:use`
+  - Notes: Determines whether the deploy invokes `nvm use` or `nvm install`.
+
+## Examples
+
+### Configuring Capistrano
+
+Using a version of NodeJS that is already installed and managed by nvm:
 
 ```ruby
-set :nvm_type, :user # or :system, depends on your nvm setup
-set :nvm_node, 'v0.10.21'
-set :nvm_map_bins, %w{node npm yarn}
+set :nvm_node, 'v8.10' # Version of node.js to use with nvm
 ```
 
-If your nvm is located in some custom path, you can use `nvm_custom_path` to set it.
+Using a version of NodeJS that we want to download and install:
+
+```ruby
+set :nvm_node, 'lts/carbon' # Friendly names work well...
+set :nvm_verb, 'install' # ...but only with the "install" verb
+```
+
+When nvm is installed at the system level:
+
+```ruby
+set :nvm_node, 'lts'
+set :nvm_verb, 'install'
+set :nvm_type, :system
+```
+
+When nvm is installed in a custom location:
+
+```ruby
+set :nvm_node, 'lts'
+set :nvm_verb, 'install'
+set :nvm_custom_path, '/usr/local/src/nvm' # This overrides :nvm_type so we won't bother setting it
+```
+
+### Using a .nvmrc file
+
+#### In your Capistrano code
+
+In `config/deploy.rb`, check for `.nvmrc` and use its value, or a sensible default like v8.10:
+
+```ruby
+set :nvm_node, File.exist?('.nvmrc') ? File.read('.nvmrc').strip : "v8.10"
+```
+
+#### From your release code
+
+In your rakefile where you `execute :npm`, `:node`, or `:yarn`, add this conditional first:
+
+```ruby
+if test "[ -e #{release_path}/.nvmrc ]"
+  download! "#{release_path}/.nvmrc", '.nvmrc'
+  SSHKit.config.default_env[:node_version] = File.read('.nvmrc').strip
+end
+```
 
 ### Rails
 

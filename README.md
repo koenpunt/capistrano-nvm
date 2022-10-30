@@ -33,8 +33,10 @@ set :nvm_map_bins, %w{node npm yarn}
 
 If your nvm is located in some custom path, you can use `nvm_custom_path` to set it.
 
-**Tip:** If you want to use nvm in your rails app deployment tasks (like ``deploy:assets:precompile``),
-consider adding ``rake`` to ``nvm_map_bins``.
+### Rails
+
+If you want to use nvm in your rails app deployment tasks (like `deploy:assets:precompile`),
+consider adding `rake` to `nvm_map_bins`.
 
 ## Contributing
 

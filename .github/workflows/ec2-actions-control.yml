@@ -1,0 +1,78 @@
+name: EC2 Start/Stop Action Control
+
+on:
+  schedule:
+    # Schedule the job to run at 7 PM on Saturday (for stopping)
+    - cron: '30 16 * * 1-5'
+    # Schedule the job to run at 7 AM on Monday (for starting)
+    - cron: '0 2 * * 1-5'
+
+  workflow_dispatch:
+    inputs:
+      ec2Action:
+        description: 'EC2 Actions:'
+        required: true
+        default: 'Start'
+        type: choice
+        options:
+        - Start
+        - Stop
+        - EnableSchedule
+        - DisableSchedule
+# permission can be added at job level or workflow level
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  control-ec2:
+    runs-on: ubuntu-latest
+    env:
+      REGION: us-east-2
+      INSTANCE_IDS: i-02d07de5641a619b0 i-0adc678c8be8ff844 i-094911cb4cf89783e
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-region: ${{ env.REGION }}
+        role-to-assume: arn:aws:iam::868927503568:role/plm_schedule_online_offline
+        role-duration-seconds: 1200
+        role-session-name: GitHubActions
+
+    - name: Start or Stop EC2 instances based on schedule or input
+      run: |
+        if [ "${{ github.event.inputs.ec2Action }}" == "EnableSchedule" ]; then
+          echo "true" > status_ec2_schedule.txt
+          aws s3 cp status_ec2_schedule.txt s3://plm-realpreprod-schedule-online-offline
+        elif [ "${{ github.event.inputs.ec2Action }}" == "DisableSchedule" ]; then
+          echo "false" > status_ec2_schedule.txt
+          aws s3 cp status_ec2_schedule.txt s3://plm-realpreprod-schedule-online-offline
+        fi
+
+        if [ "${{ github.event_name }}" == "schedule" ]; then
+          echo "Fetching Schedule Status"
+          status="false"
+          aws s3 cp s3://plm-realpreprod-schedule-online-offline/status_ec2_schedule.txt status_ec2_schedule.txt
+          if [ -s status_ec2_schedule.txt ]; then
+              read -r status < status_ec2_schedule.txt
+          fi
+          echo "Status: $status"
+          if [ "${{ github.event.schedule }}" == "0 2 * * 1-5" -a "$status" == "true" ]; then
+            echo "Starting EC2 Instances: ${{ env.INSTANCE_IDS }}"
+            # Update command here
+          elif [ "${{ github.event.schedule }}" == "30 16 * * 1-5" -a "$status" == "true" ]; then
+            echo "Stopping EC2 Instances: ${{ env.INSTANCE_IDS }}"
+            # Update command here
+          fi
+        elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          if [ "${{ github.event.inputs.ec2Action }}" == "Start" ]; then
+            echo "Starting EC2 Instances: ${{ env.INSTANCE_IDS }}"
+            # Update command here
+          else
+            echo "Stopping EC2 Instances: ${{ env.INSTANCE_IDS }}"
+            # Update command here
+          fi
+        fi

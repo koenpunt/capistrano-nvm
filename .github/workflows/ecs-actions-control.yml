@@ -1,0 +1,118 @@
+name: ECS Scale In/Out Actions Control
+
+on:
+  schedule:
+    # Schedule the job to scale out at 7 PM on weekdays
+    - cron: '30 16 * * 1-5'
+    # Schedule the job to scale in at 7 AM on weekdays
+    - cron: '0 2 * * 1-5'
+
+  workflow_dispatch:
+    inputs:
+      ecsAction:
+        description: 'ECS Actions:'
+        required: true
+        default: 'Start'
+        type: choice
+        options:
+        - Start
+        - Stop
+        - EnableSchedule
+        - DisableSchedule
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  control-ecs:
+    runs-on: ubuntu-latest
+    env:
+      REGION: us-east-2
+      CLUSTER_NAME: app-realpreprod
+      DESIRED_COUNT_SCALE_OUT: 1
+      DESIRED_COUNT_SCALE_IN: 0
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-region: ${{ env.REGION }}
+        role-to-assume: arn:aws:iam::868927503568:role/plm_schedule_online_offline
+        role-duration-seconds: 1200
+        role-session-name: GitHubActions
+
+    - name: Get desired count of ECS services before scaling
+      run: |
+        services="$(aws ecs list-services --cluster ${{ env.CLUSTER_NAME }} | jq -r '.serviceArns[] | split("/") | .[2]' | tr '\n' ' ')"
+        echo "services=$services" >> $GITHUB_ENV
+        services=($services)
+
+        echo "Number of services in the ecs cluster ${{ env.CLUSTER_NAME }}: ${#services[@]}"
+        for service in "${services[@]}"
+        do
+          desired_count=$(aws ecs describe-services --cluster ${{ env.CLUSTER_NAME }} --services $service --query "services[0].desiredCount" --output text)
+          echo "Service: $service ---> Desired count: $desired_count"
+        done
+
+    - name: Scale In or Scale Out ECS service based on schedule or input
+      run: |
+        services="$(aws ecs list-services --cluster ${{ env.CLUSTER_NAME }} | jq -r '.serviceArns[] | split("/") | .[2]' | tr '\n' ' ')"
+        services=($services)
+        if [ "${{ github.event.inputs.ecsAction }}" == "EnableSchedule" ]; then
+          echo "true" > status_ecs_schedule.txt
+          aws s3 cp status_ecs_schedule.txt s3://plm-realpreprod-schedule-online-offline
+        elif [ "${{ github.event.inputs.ecsAction }}" == "DisableSchedule" ]; then
+          echo "false" > status_ecs_schedule.txt
+          aws s3 cp status_ecs_schedule.txt s3://plm-realpreprod-schedule-online-offline
+        fi
+        if [ "${{ github.event_name }}" == "schedule" ]; then
+          status="false"
+          aws s3 cp s3://plm-realpreprod-schedule-online-offline/status_ecs_schedule.txt status_ecs_schedule.txt
+          if [ -s status_ecs_schedule.txt ]; then
+              read -r status < status_ecs_schedule.txt
+          fi
+          echo "Status: $status"
+          if [ "${{ github.event.schedule }}" == "30 16 * * 1-5" -a "$status" == "true" ]; then
+            for service_name in "${services[@]}"; do
+              echo "Service name: $service_name"
+              # Update command here
+              echo "Updating $service_name to desired-count ${{ env.DESIRED_COUNT_SCALE_IN }}"
+            done
+
+          elif [ "${{ github.event.schedule }}" == "0 2 * * 1-5" -a "$status" == "true" ]; then
+            for service_name in "${services[@]}"; do
+              echo "Service name: $service_name"
+              # Update command here
+              echo "Updating $service_name to desired-count ${{ env.DESIRED_COUNT_SCALE_OUT }}"
+            done
+          fi
+        elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          echo "Number of services in the ecs cluster ${{ env.CLUSTER_NAME }}: ${#services[@]}"
+          if [ "${{ github.event.inputs.ecsAction }}" == "Start" ]; then
+            for service_name in "${services[@]}"; do
+              echo "Service name: $service_name"
+              # Update command here
+              echo "Updating $service_name to desired-count ${{ env.DESIRED_COUNT_SCALE_OUT }}"
+            done
+          elif [ "${{ github.event.inputs.ecsAction }}" == "Stop" ]; then
+            for service_name in "${services[@]}"; do
+              echo "Service name: $service_name"
+              # Update command here
+              echo "Updating $service_name to desired-count ${{ env.DESIRED_COUNT_SCALE_IN }}"
+            done
+          fi
+        fi
+
+    - name: Get desired count of ECS services after scaling
+      run: |
+        services="$(aws ecs list-services --cluster ${{ env.CLUSTER_NAME }} | jq -r '.serviceArns[] | split("/") | .[2]' | tr '\n' ' ')"
+        services=($services)
+        echo "Number of services in the ecs cluster ${{ env.CLUSTER_NAME }}: ${#services[@]}"
+        for service in "${services[@]}"
+        do
+          desired_count=$(aws ecs describe-services --cluster ${{ env.CLUSTER_NAME }} --services $service --query "services[0].desiredCount" --output text)
+          echo "Service: $service ---> Desired count: $desired_count"
+        done

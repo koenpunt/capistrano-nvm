@@ -1,0 +1,105 @@
+name: RDS Start/Stop Actions Control
+
+on:
+  schedule:
+    # Schedule the job to run at 7 PM on Saturday (for stopping)
+    - cron: '30 16 * * 1-5'
+    # Schedule the job to run at 7 AM on Monday (for starting)
+    - cron: '0 2 * * 1-5'
+
+  workflow_dispatch:
+    inputs:
+      RDSAction:
+        description: 'RDS Actions:'
+        required: true
+        default: 'Start'
+        type: choice
+        options:
+        - Start
+        - Stop
+        - EnableSchedule
+        - DisableSchedule
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+jobs:
+  control-RDS:
+    runs-on: ubuntu-latest
+    env:
+      REGION: us-east-2
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-region: ${{ env.REGION }}
+        role-to-assume: arn:aws:iam::868927503568:role/plm_schedule_online_offline
+        role-duration-seconds: 1200
+        role-session-name: GitHubActions
+
+    - name: Get name list of RDS instances before stop or start
+      run: |
+        instances=$(aws rds describe-db-instances --query 'DBInstances[*].DBInstanceIdentifier' | jq -r '.[]')
+        num_instances=$(echo "$instances" | wc -l)
+        echo "Number of instances in the RDS services: $num_instances"
+        for instance in $instances
+        do
+          status=$(aws rds describe-db-instances --db-instance-identifier $instance --query 'DBInstances[*].DBInstanceStatus' | jq -r '.[]')
+          echo "Instance: $instance -------> Status: $status"
+        done
+
+    - name: Start or Stop RDS instances based on schedule or input
+      run: |
+        instances=$(aws rds describe-db-instances --query 'DBInstances[*].DBInstanceIdentifier' | jq -r '.[]')
+        if [ "${{ github.event.inputs.RDSAction }}" == "EnableSchedule" ]; then
+          echo "true" > status_rds_schedule.txt
+          aws s3 cp status_rds_schedule.txt s3://plm-realpreprod-schedule-online-offline
+        elif [ "${{ github.event.inputs.RDSAction }}" == "DisableSchedule" ]; then
+          echo "false" > status_rds_schedule.txt
+          aws s3 cp status_rds_schedule.txt s3://plm-realpreprod-schedule-online-offline
+        fi
+
+        if [ "${{ github.event_name }}" == "schedule" ]; then
+          status="false"
+          aws s3 cp s3://plm-realpreprod-schedule-online-offline/status_rds_schedule.txt status_rds_schedule.txt
+          if [ -s status_rds_schedule.txt ]; then
+            read -r status < status_rds_schedule.txt
+          fi
+          echo "Status: $status"
+          if [ "${{ github.event.schedule }}" == "0 2 * * 1-5" -a "$status" == "true" ]; then
+            for instance_id in $instances; do
+              # Update command here
+              echo "Start instance: $instance -------> Status: $status"
+            done
+          elif [ "${{ github.event.schedule }}" == "30 16 * * 1-5" -a "$status" == "true" ]; then
+            for instance_id in $instances; do
+              # Update command here
+              echo "Stop instance: $instance -------> Status: $status"
+            done
+          fi
+        elif [ "${{ github.event_name }}" == "workflow_dispatch"  ]; then
+          if [ "${{ github.event.inputs.RDSAction }}" == "Start" ]; then
+            for instance_id in $instances; do
+              # Update command here
+              echo "Start instance: $instance -------> Status: $status"
+            done
+          elif [ "${{ github.event.inputs.RDSAction }}" == "Stop" ]; then
+            for instance_id in $instances; do
+              # Update command here
+              echo "Stop instance: $instance -------> Status: $status"
+            done
+          fi
+        fi
+    - name: Get name list of RDS instances after stop or start
+      run: |
+        instances=$(aws rds describe-db-instances --query 'DBInstances[*].DBInstanceIdentifier' | jq -r '.[]')
+        num_instances=$(echo "$instances" | wc -l)
+        echo "Number of instances in the RDS services: $num_instances"
+        for instance in $instances
+        do
+          status=$(aws rds describe-db-instances --db-instance-identifier $instance --query 'DBInstances[*].DBInstanceStatus' | jq -r '.[]')
+          echo "Instance: $instance -------> Status: $status"
+        done
